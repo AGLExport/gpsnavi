@@ -38,7 +38,7 @@ package:src/navi
 	cp src/.libs/navi package/root/
 	cp flite package/root/
 	cp jtalk package/root/
-	cp src/.libs/libnavicore.so.0.0.1 package/root$(base_libdir)
+	cp src/.libs/libnavicore.so.0.0.1 package/root$(base_libdir)/
 	cp $(srcdir)/agl/config.xml package/root/
 	cp $(srcdir)/agl/HMI_AppLauncher_Navigation_Active-01.png package/root/navigation.png
 	wgtpkg-pack -f -o package/navigation.wgt package/root
