@@ -35,6 +35,7 @@ endif
 package:src/navi
 	rm -rf package/
 	mkdir -p package/root
+	mkdir -p package/root$(base_libdir)
 	cp src/.libs/navi package/root/
 	cp flite package/root/
 	cp jtalk package/root/
