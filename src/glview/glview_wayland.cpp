@@ -604,7 +604,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
 	else if (strcmp(interface, "ivi_application") == 0)
 	{
 		d->ivi_application =
-			(const struct ivi_application *)wl_registry_bind(registry, id,
+			(struct ivi_application *)wl_registry_bind(registry, id,
 					 (const struct wl_interface *)&ivi_application_interface, 1);
 	}
 }
