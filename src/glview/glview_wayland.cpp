@@ -100,7 +100,7 @@ int init_wm(LibWindowmanager *wm)
 {
 	char* surfaceIdStr;
 
-	if (wm->init(port, token.c_str()) != 0) {
+	if (wm->init(g_port, g_token.c_str()) != 0) {
         	return -1;
 	}
 
@@ -185,7 +185,7 @@ int init_wm(LibWindowmanager *wm)
 
 int
 init_hs(LibHomeScreen* hs){
-	if(hs->init(port, token)!=0)
+	if(hs->init(g_port, g_token)!=0)
 	{
 		fprintf(stderr,"homescreen init failed. ");
 		return -1;
