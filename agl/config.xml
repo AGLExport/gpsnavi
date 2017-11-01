@@ -8,6 +8,10 @@
   <feature name="urn:AGL:widget:required-permission">
     <param name="http://tizen.org/privilege/internal/dbus" value="required" />
   </feature>
+  <feature name="urn:AGL:widget:required-api">
+    <param name="homescreen" value="ws" />
+    <param name="windowmanager" value="ws" />
+  </feature>
   <license>GPL</license>
   <feature name="urn:AGL:widget:file-properties">
     <param name="flite" value="executable" />
