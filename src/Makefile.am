@@ -612,7 +612,7 @@ navi_CPPFLAGS = \
         -I$(top_srcdir)/src/api
 
 
-navi_CFLAGS = \
+navi_CFLAGS = -fno-permissive \
         @GLIB_CFLAGS@ \
         @FREETYPE2_CFLAGS@ \
         @WAYLAND_CFLAGS@ \
@@ -625,7 +625,7 @@ navi_CFLAGS = \
 	@WINDOWMANAGER_CFLAGS@ \
 	@HOMESCREEN_CFLAGS@ 
 
-navi_CXXFLAGS = -std=c++11 \
+navi_CXXFLAGS = -std=c++11 -fno-permissive \
         @GLIB_CFLAGS@ \
         @FREETYPE2_CFLAGS@ \
         @WAYLAND_CFLAGS@ \
