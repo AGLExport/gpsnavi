@@ -25,10 +25,8 @@
 #include <linux/input.h> // for BTN_LEFT
 #endif /* GLV_WAYLAND_INPUT */
 
-extern "C" {
 #include <wayland-client.h>
 #include <wayland-egl.h>
-}
 
 #define	IVISHELL	(1)
 //#define IVI_SURFACE_ID (0x1302)
@@ -481,9 +479,12 @@ static const struct wl_touch_listener touch_listener = {
 };
 #endif /* GLV_WAYLAND_TOUCH */
 
-static void
+//static void
 seat_handle_capabilities(void *data, struct wl_seat *seat,
-                         enum wl_seat_capability caps)
+//                         enum wl_seat_capability caps)
+extern "C" static void
+seat_handle_capabilities(void *data, struct wl_seat *seat,
+                         uint32_t caps)
 {
     if (caps & WL_SEAT_CAPABILITY_POINTER) {
 		//printf("Display has a pointer\n");
@@ -581,30 +582,30 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
    WLDISPLAY_t *d = (WLDISPLAY_t *)data;
 
    if (strcmp(interface, "wl_compositor") == 0) {
-      d->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
+      d->compositor = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_compositor_interface, 1);
    } else if (strcmp(interface, "wl_shell") == 0) {
-      d->shell = wl_registry_bind(registry, id, (void*)&wl_shell_interface, 1);
+      d->shell = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_shell_interface, 1);
    }
 #ifdef GLV_WAYLAND_INPUT
    else if (strcmp(interface, "wl_seat") == 0) {
 #ifdef GLV_WAYLAND_TOUCH
 		struct touch_event_data *touch_event = (touch_event_data *)calloc(1, sizeof *touch_event);
-		seat = wl_registry_bind(registry, id, (void*)&wl_seat_interface, 1);
+		seat = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, touch_event);
 #else
-		seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
+		seat = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, NULL);
 #endif /* !GLV_WAYLAND_TOUCH */
    }
 #endif /* GLV_WAYLAND_INPUT */
    else if (strcmp(interface, "wl_subcompositor") == 0) {
-   		d->subcompositor = wl_registry_bind(registry, id, (void*)&wl_subcompositor_interface, 1);
+   		d->subcompositor = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_subcompositor_interface, 1);
 	}
 	else if (strcmp(interface, "ivi_application") == 0)
 	{
 		d->ivi_application =
 			wl_registry_bind(registry, id,
-					 (void*)&ivi_application_interface, 1);
+					 (const struct wl_interface *)&ivi_application_interface, 1);
 	}
 }
 
