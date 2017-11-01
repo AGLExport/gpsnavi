@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <string.h>
 
-#extern "C" {
+extern "C" {
 #include "glview.h"
 #include "glview_local.h"
 }
