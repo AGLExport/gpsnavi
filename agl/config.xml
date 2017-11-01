@@ -6,7 +6,6 @@
   <description>NAVIGATION App</description>
   <author>AISIN AW</author>
   <feature name="urn:AGL:widget:required-permission">
-    <param name="http://tizen.org/privilege/internal/dbus" value="required" />
     <param name="urn:AGL:permission::public:no-htdocs" value="required" />
   </feature>
   <feature name="urn:AGL:widget:required-api">
@@ -14,8 +13,4 @@
     <param name="windowmanager" value="ws" />
   </feature>
   <license>GPL</license>
-  <feature name="urn:AGL:widget:file-properties">
-    <param name="flite" value="executable" />
-    <param name="jtalk" value="executable" />
-  </feature>
 </widget>
