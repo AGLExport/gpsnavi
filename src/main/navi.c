@@ -505,6 +505,10 @@ static void usage(void)
 	printf("  --help                      this help message\n");
 }
 
+extern void setPort(long port);
+extern void setToken(char *tkn);
+
+
 int main_arg(int argc, char *argv[])
 {
 	int width,height;
@@ -512,6 +516,9 @@ int main_arg(int argc, char *argv[])
 	char *home;
 	int ret = -1;
 	
+	setPort(strtol(argv[1], NULL, 10));
+	setToken(argv[2]);
+
 	ret = search_map_data();
 	if (ret != 0)
 	{

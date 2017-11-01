@@ -74,16 +74,28 @@ LibWindowmanager	*g_wm;
 LibHomeScreen	*g_hs;
 uint32_t g_id_ivisurf = 0;
 bool gIsDraw;
-
+long g_port = 0;
+std::string g_token;
 const char *g_app_name = "NAVI";
 
-extern "C" int canUpdate(void)
+extern "C" {
+int canUpdate(void)
 {
 	if (gIsDraw == true) return 1;
 
 	return 0;
 }
 
+void setPort(long port)
+{
+	g_port = port;
+}
+
+void setToken(char *tkn)
+{
+	g_token = std::string(tkn);
+}
+}
 int init_wm(LibWindowmanager *wm)
 {
 	char* surfaceIdStr;
