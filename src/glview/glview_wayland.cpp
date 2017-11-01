@@ -570,7 +570,7 @@ static const struct wl_shell_surface_listener shell_surface_listener = {
 #endif /* GLV_WAYLAND_INPUT */
 
 // ----------------------------------------------------------------------------
-void _glvInitNativeDisplay(GLVDISPLAY_t *glv_dpy)
+extern "C" void _glvInitNativeDisplay(GLVDISPLAY_t *glv_dpy)
 {
 	   // non
 }
@@ -593,7 +593,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
 		seat = (struct wl_seat *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, touch_event);
 #else
-		seat = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
+		seat = (struct wl_seat *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, NULL);
 #endif /* !GLV_WAYLAND_TOUCH */
    }
@@ -667,7 +667,7 @@ static int wayland_roundtrip(struct wl_display *display)
    return ret;
 }
 
-void _glvOpenNativeDisplay(GLVDISPLAY_t *glv_dpy)
+extern "C" void _glvOpenNativeDisplay(GLVDISPLAY_t *glv_dpy)
 {
 	   struct wl_registry *registry;
 
@@ -686,13 +686,13 @@ void _glvOpenNativeDisplay(GLVDISPLAY_t *glv_dpy)
 	   wl_registry_destroy(registry);
 }
 
-void _glvCloseNativeDisplay(GLVDISPLAY_t *glv_dpy)
+extern "C" void _glvCloseNativeDisplay(GLVDISPLAY_t *glv_dpy)
 {
 	   wl_display_flush(glv_dpy->native_dpy);
 	   wl_display_disconnect(glv_dpy->native_dpy);
 }
 
-GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
+extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
               int x, int y, int width, int height,
 			  GLVWindow glv_window_parent)
 {
@@ -802,7 +802,7 @@ GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
    return((GLVWindow)glv_window);
 }
 
-void _glvDestroyNativeWindow(GLVWindow glv_win)
+extern "C" void _glvDestroyNativeWindow(GLVWindow glv_win)
 {
 	GLVWINDOW_t *glv_window=(GLVWINDOW_t *)glv_win;
 
