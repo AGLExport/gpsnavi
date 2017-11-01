@@ -160,7 +160,7 @@ void glvSwapBuffers(GLVContext glv_c)
 	glv_context = (GLVCONTEXT_t*)glv_c;
 
 
-	if (canUpdate() == 1)
+	//if (canUpdate() == 1)
 	{
 		eglSwapBuffers(glv_context->glv_win->glv_dpy->egl_dpy, glv_context->egl_surf);
 	}
@@ -215,7 +215,7 @@ void *glvSurfaceViewMsgHandler(GLVCONTEXT_t *glv_context)
 					fprintf(stderr,"glv_context->eventFunc.redraw error\n");
 				}
 			}
-			if (canUpdate() == 1)
+			//if (canUpdate() == 1)
 			{
 				eglSwapBuffers(glv_context->glv_win->glv_dpy->egl_dpy, glv_context->egl_surf);
 			}

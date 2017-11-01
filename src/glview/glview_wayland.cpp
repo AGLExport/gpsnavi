@@ -83,9 +83,9 @@ const char *g_app_name = "Navigation";
 extern "C" {
 int canUpdate(void)
 {
-//	return 1;
-	if (gIsDraw == true) return 1;
-	return 0;
+	return 1;
+//	if (gIsDraw == true) return 1;
+//	return 0;
 }
 
 void setPort(long port)
