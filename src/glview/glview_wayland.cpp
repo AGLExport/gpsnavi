@@ -157,8 +157,8 @@ int init_wm(LibWindowmanager *wm)
 			//gWindow->geometry.height = 744;
 		}
 
-		if (!gWindow->fullscreen)
-			gWindow->window_size = gWindow->geometry;
+		//if (!gWindow->fullscreen)
+		//	gWindow->window_size = gWindow->geometry;
 		gIsDraw = true;
 		json_object *obj = json_object_new_object();
 		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
@@ -480,7 +480,7 @@ static const struct wl_touch_listener touch_listener = {
 #endif /* GLV_WAYLAND_TOUCH */
 
 //static void
-seat_handle_capabilities(void *data, struct wl_seat *seat,
+//seat_handle_capabilities(void *data, struct wl_seat *seat,
 //                         enum wl_seat_capability caps)
 extern "C" static void
 seat_handle_capabilities(void *data, struct wl_seat *seat,
