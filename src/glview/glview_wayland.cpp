@@ -482,7 +482,7 @@ static const struct wl_touch_listener touch_listener = {
 //static void
 //seat_handle_capabilities(void *data, struct wl_seat *seat,
 //                         enum wl_seat_capability caps)
-extern "C" static void
+static void
 seat_handle_capabilities(void *data, struct wl_seat *seat,
                          uint32_t caps)
 {
@@ -582,15 +582,15 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
    WLDISPLAY_t *d = (WLDISPLAY_t *)data;
 
    if (strcmp(interface, "wl_compositor") == 0) {
-      d->compositor = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_compositor_interface, 1);
+      d->compositor = (struct wl_interface *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_compositor_interface, 1);
    } else if (strcmp(interface, "wl_shell") == 0) {
-      d->shell = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_shell_interface, 1);
+      d->shell = (struct wl_shell *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_shell_interface, 1);
    }
 #ifdef GLV_WAYLAND_INPUT
    else if (strcmp(interface, "wl_seat") == 0) {
 #ifdef GLV_WAYLAND_TOUCH
 		struct touch_event_data *touch_event = (touch_event_data *)calloc(1, sizeof *touch_event);
-		seat = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
+		seat = (struct wl_seat *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, touch_event);
 #else
 		seat = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_seat_interface, 1);
@@ -599,12 +599,12 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
    }
 #endif /* GLV_WAYLAND_INPUT */
    else if (strcmp(interface, "wl_subcompositor") == 0) {
-   		d->subcompositor = wl_registry_bind(registry, id, (const struct wl_interface *)&wl_subcompositor_interface, 1);
+   		d->subcompositor = (struct wl_subcompositor *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_subcompositor_interface, 1);
 	}
 	else if (strcmp(interface, "ivi_application") == 0)
 	{
 		d->ivi_application =
-			wl_registry_bind(registry, id,
+			(const struct ivi_application *)wl_registry_bind(registry, id,
 					 (const struct wl_interface *)&ivi_application_interface, 1);
 	}
 }
