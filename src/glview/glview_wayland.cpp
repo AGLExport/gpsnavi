@@ -582,7 +582,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
    WLDISPLAY_t *d = (WLDISPLAY_t *)data;
 
    if (strcmp(interface, "wl_compositor") == 0) {
-      d->compositor = (struct wl_interface *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_compositor_interface, 1);
+      d->compositor = (struct wl_compositor *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_compositor_interface, 1);
    } else if (strcmp(interface, "wl_shell") == 0) {
       d->shell = (struct wl_shell *)wl_registry_bind(registry, id, (const struct wl_interface *)&wl_shell_interface, 1);
    }
