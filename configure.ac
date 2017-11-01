@@ -30,7 +30,7 @@ PKG_CHECK_MODULES([ZLIB], [zlib])
 PKG_CHECK_MODULES([SQLITE3], [sqlite3])
 PKG_CHECK_MODULES([EXPAT], [expat])
 PKG_CHECK_MODULES([OPENSSL], [openssl])
-PKG_CHECK_MODULES([WINDOWMANAGER], [windowmanager])
+PKG_CHECK_MODULES([WINDOWMANAGER], [libwindowmanager])
 PKG_CHECK_MODULES([HOMESCREEN], [libhomescreen])
 
 # Checks for programs.
