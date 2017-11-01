@@ -91,11 +91,13 @@ int canUpdate(void)
 void setPort(long port)
 {
 	g_port = port;
+	fprintf(stderr,"NAVI port = %d\n", g_port);
 }
 
 void setToken(char *tkn)
 {
 	g_token = std::string(tkn);
+	fprintf(stderr,"NAVI token = %s\n", g_token.c_str());
 }
 }
 int init_wm(LibWindowmanager *wm)

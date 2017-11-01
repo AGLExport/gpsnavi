@@ -613,12 +613,17 @@ int main(int argc, char *argv[])
 	GLVWindow	glv_hmi_window;
 	int rc;
 
+	if (argc < 2)
+	{
+		fprintf(stderr,"Error:few args\n"	
+	}
+
 	rc = main_arg(argc,argv);
 	if(0 != rc){
 		return(-1);
 	}
 
-	printf("%s\n",APP_NAME_TEXT);
+	fprintf(stderr,"%s\n",APP_NAME_TEXT);
 
 	naviStartUpResolution(resolution);
 	naviStartUpRegion(region);
