@@ -533,7 +533,7 @@ int main_arg(int argc, char *argv[])
 		}
 	}
 
-	for(i = 1; i < argc; i++) {
+	for(i = 3; i < argc; i++) {
 		if(strcmp(argv[i], "-display") == 0) {
 			dpyName = argv[i+1];
 			i++;
