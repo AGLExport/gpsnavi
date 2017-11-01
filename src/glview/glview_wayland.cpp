@@ -100,57 +100,57 @@ int init_wm(LibWindowmanager *wm)
 {
 	char* surfaceIdStr;
 
-	if (wm->init(g_port, g_token.c_str()) != 0) {
+	if (g_wm->init(g_port, g_token.c_str()) != 0) {
         	return -1;
 	}
 
 	json_object *obj = json_object_new_object();
-	json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string(g_app_name));
-	if (wm->requestSurface(obj) != 0) {
+	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
+	if (g_wm->requestSurface(obj) != 0) {
 		fprintf(stderr,"wm request surface failed ");
 		return -1;
 	}
 
-	wm->set_event_handler(LibWindowmanager::Event_Active, [wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Active, [g_wm](json_object *object) {
 		const char *label = json_object_get_string(
-			json_object_object_get(object, wm->kKeyDrawingName));
+			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got activated! ", label);
 	});
 
-	wm->set_event_handler(LibWindowmanager::Event_Inactive, [wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Inactive, [g_wm](json_object *object) {
 		const char *label = json_object_get_string(
-			json_object_object_get(object, wm->kKeyDrawingName));
+			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got inactivated!", label);
 	});
 
-	wm->set_event_handler(LibWindowmanager::Event_Visible, [wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Visible, [g_wm](json_object *object) {
 		const char *label = json_object_get_string(
-			json_object_object_get(object, wm->kKeyDrawingName));
+			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got visibled!", label);
 	});
 
-	wm->set_event_handler(LibWindowmanager::Event_Invisible, [wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Invisible, [g_wm](json_object *object) {
 		const char *label = json_object_get_string(
 			json_object_object_get(object, wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got invisibled!", label);
 		gIsDraw = false;
 	});
 
-	wm->set_event_handler(LibWindowmanager::Event_SyncDraw, [wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_SyncDraw, [g_wm](json_object *object) {
 		const char *label = json_object_get_string(
-			json_object_object_get(object, wm->kKeyDrawingName));
+			json_object_object_get(object, g_wm->kKeyDrawingName));
 		const char *area = json_object_get_string(
-			json_object_object_get(object, wm->kKeyDrawingArea));
+			json_object_object_get(object, g_wm->kKeyDrawingArea));
 
 		fprintf(stderr,"Surface %s got syncDraw! Area: %s. ", label, area);
-		if ((wm->kStrLayoutNormal + "." + wm->kStrAreaFull) == std::string(area)) {
+		if ((g_wm->kStrLayoutNormal + "." + g_wm->kStrAreaFull) == std::string(area)) {
 			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d ", area, 0, 0, 1080, 1488);
 			wl_egl_window_resize(gWindow->native, 1080, 1488, 0, 0);
 			gWindow->geometry.width = 1080;
 			gWindow->geometry.height = 1488;
 		}
-		else if ((wm->kStrLayoutSplit + "." + wm->kStrAreaMain)	== std::string(area) ||
-				 (wm->kStrLayoutSplit + "." + wm->kStrAreaSub) == std::string(area)) {
+		else if ((g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaMain)	== std::string(area) ||
+				 (g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaSub) == std::string(area)) {
 			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d ", area, 0, 0, 1080, 744);
 			wl_egl_window_resize(gWindow->native, 1080, 744, 0, 0);
 			gWindow->geometry.width = 1080;
@@ -161,14 +161,14 @@ int init_wm(LibWindowmanager *wm)
 			gWindow->window_size = gWindow->geometry;
 		gIsDraw = true;
 		json_object *obj = json_object_new_object();
-		json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string(g_app_name));
+		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
 
-        wm->endDraw(obj);
+        g_wm->endDraw(obj);
     });
 
-	wm->set_event_handler(LibWindowmanager::Event_FlushDraw, [wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_FlushDraw, [g_wm](json_object *object) {
 		const char *label = json_object_get_string(
-			json_object_object_get(object, wm->kKeyDrawingName));
+			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got flushdraw! ", label);
 	});
 
@@ -185,13 +185,13 @@ int init_wm(LibWindowmanager *wm)
 
 int
 init_hs(LibHomeScreen* hs){
-	if(hs->init(g_port, g_token)!=0)
+	if(g_hs->init(g_port, g_token)!=0)
 	{
 		fprintf(stderr,"homescreen init failed. ");
 		return -1;
 	}
 
-	hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
+	g_hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
 		const char *application_name = json_object_get_string(
 			json_object_object_get(object, "application_name"));
 		fprintf(stderr,"Event_TapShortcut application_name = %s ", application_name);
@@ -199,14 +199,14 @@ init_hs(LibHomeScreen* hs){
 		{
 			fprintf(stderr,"try to activesurface %s ", g_app_name);
 			json_object *obj = json_object_new_object();
-			json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string(g_app_name));
-			json_object_object_add(obj, wm->kKeyDrawingArea, json_object_new_string("normal.full"));
+			json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
+			json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
 			gIsDraw = false;
-			wm->activateSurface(obj);
+			g_wm->activateSurface(obj);
 		}
 	});
 
-	hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [](json_object *object){
+	g_hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [](json_object *object){
 		const char *display_message = json_object_get_string(
 			json_object_object_get(object, "display_message"));
         fprintf(stderr,"Event_OnScreenMessage display_message = %s ", display_message);
@@ -380,7 +380,7 @@ touch_handle_down(void *data, struct wl_touch *touch, uint32_t serial,
 		//	   "but this is not handled\n", id);
 		return;
 	}
-	struct touch_event_data *touch_event = data;
+	struct touch_event_data *touch_event = (struct touch_event_data *)data;
 	touch_event->x = wl_fixed_to_int(x_w);
 	touch_event->y = wl_fixed_to_int(y_w);
 
@@ -412,7 +412,7 @@ touch_handle_up(void *data, struct wl_touch *touch, uint32_t serial,
 	if (id > 0) {
 		return;
 	}
-	struct touch_event_data *touch_event = data;
+	struct touch_event_data *touch_event = (struct touch_event_data *)data;
 
 	/* map surface event */
 	if (touch_event->event_type == 1){
@@ -438,7 +438,7 @@ touch_handle_motion(void *data, struct wl_touch *touch, uint32_t time,
 	if (id > 0) {
 		return;
 	}
-	struct touch_event_data *touch_event = data;
+	struct touch_event_data *touch_event = (struct touch_event_data *)data;
 	touch_event->x = wl_fixed_to_int(x_w);
 	touch_event->y = wl_fixed_to_int(y_w);
     pointer_sx = touch_event->x;
@@ -522,7 +522,7 @@ seat_handle_capabilities(void *data, struct wl_seat *seat,
 		touch = wl_seat_get_touch(seat);
 		if (touch != NULL)
 		{
-			wl_touch_add_listener(touch, &touch_listener, data);
+			wl_touch_add_listener(touch, &touch_listener, (struct touch_event_data *)data);
 		}
 	} else if (!(caps & WL_SEAT_CAPABILITY_TOUCH) && touch) {
 		if (touch != NULL)
@@ -576,7 +576,7 @@ static void
 registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
                        const char *interface, uint32_t version)
 {
-   WLDISPLAY_t *d = data;
+   WLDISPLAY_t *d = (WLDISPLAY_t *)data;
 
    if (strcmp(interface, "wl_compositor") == 0) {
       d->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
@@ -586,7 +586,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
 #ifdef GLV_WAYLAND_INPUT
    else if (strcmp(interface, "wl_seat") == 0) {
 #ifdef GLV_WAYLAND_TOUCH
-		struct touch_event_data *touch_event = calloc(1, sizeof *touch_event);
+		struct touch_event_data *touch_event = (touch_event_data *)calloc(1, sizeof *touch_event);
 		seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, touch_event);
 #else
@@ -620,7 +620,7 @@ static const struct wl_registry_listener registry_listener = {
 static void
 sync_callback(void *data, struct wl_callback *callback, uint32_t serial)
 {
-   int *done = data;
+   int *done = (int*)data;
 
    *done = 1;
    wl_callback_destroy(callback);
@@ -749,9 +749,9 @@ GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 			}
 
 			json_object *obj = json_object_new_object();
-			json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string("NAVI"));
-			json_object_object_add(obj, wm->kKeyDrawingArea, json_object_new_string("normal.full"));
-			wm->activateSurface(obj);
+			json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string("NAVI"));
+			json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
+			g_wm->activateSurface(obj);
 		}
 #else
 		shell_surface = wl_shell_get_shell_surface(wl_dpy->shell,surface);
