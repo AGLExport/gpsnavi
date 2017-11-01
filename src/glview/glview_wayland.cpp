@@ -25,8 +25,10 @@
 #include <linux/input.h> // for BTN_LEFT
 #endif /* GLV_WAYLAND_INPUT */
 
+#extern "C" {
 #include <wayland-client.h>
 #include <wayland-egl.h>
+}
 
 #define	IVISHELL	(1)
 //#define IVI_SURFACE_ID (0x1302)
@@ -579,7 +581,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id,
    WLDISPLAY_t *d = (WLDISPLAY_t *)data;
 
    if (strcmp(interface, "wl_compositor") == 0) {
-      d->compositor = wl_registry_bind(registry, id, (void*)&wl_compositor_interface, 1);
+      d->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
    } else if (strcmp(interface, "wl_shell") == 0) {
       d->shell = wl_registry_bind(registry, id, (void*)&wl_shell_interface, 1);
    }
