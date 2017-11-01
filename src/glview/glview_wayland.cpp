@@ -131,7 +131,7 @@ int init_wm(LibWindowmanager *wm)
 
 	g_wm->set_event_handler(LibWindowmanager::Event_Invisible, [g_wm](json_object *object) {
 		const char *label = json_object_get_string(
-			json_object_object_get(object, wm->kKeyDrawingName));
+			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got invisibled!", label);
 		gIsDraw = false;
 	});
@@ -145,16 +145,16 @@ int init_wm(LibWindowmanager *wm)
 		fprintf(stderr,"Surface %s got syncDraw! Area: %s. ", label, area);
 		if ((g_wm->kStrLayoutNormal + "." + g_wm->kStrAreaFull) == std::string(area)) {
 			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d ", area, 0, 0, 1080, 1488);
-			wl_egl_window_resize(gWindow->native, 1080, 1488, 0, 0);
-			gWindow->geometry.width = 1080;
-			gWindow->geometry.height = 1488;
+			//wl_egl_window_resize(gWindow->native, 1080, 1488, 0, 0);
+			//gWindow->geometry.width = 1080;
+			//gWindow->geometry.height = 1488;
 		}
 		else if ((g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaMain)	== std::string(area) ||
 				 (g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaSub) == std::string(area)) {
 			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d ", area, 0, 0, 1080, 744);
-			wl_egl_window_resize(gWindow->native, 1080, 744, 0, 0);
-			gWindow->geometry.width = 1080;
-			gWindow->geometry.height = 744;
+			//wl_egl_window_resize(gWindow->native, 1080, 744, 0, 0);
+			//gWindow->geometry.width = 1080;
+			//gWindow->geometry.height = 744;
 		}
 
 		if (!gWindow->fullscreen)
