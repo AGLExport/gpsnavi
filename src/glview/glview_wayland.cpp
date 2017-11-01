@@ -25,7 +25,7 @@
 #include <linux/input.h> // for BTN_LEFT
 #endif /* GLV_WAYLAND_INPUT */
 
-#extern "C" {
+extern "C" {
 #include <wayland-client.h>
 #include <wayland-egl.h>
 }
