@@ -78,7 +78,7 @@ uint32_t g_id_ivisurf = 0;
 bool gIsDraw;
 long g_port = 0;
 std::string g_token;
-const char *g_app_name = "NAVI";
+const char *g_app_name = "Navigation";
 
 extern "C" {
 int canUpdate(void)
@@ -115,32 +115,32 @@ int init_wm(LibWindowmanager *wm)
 		return -1;
 	}
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Active, [g_wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Active, [wm](json_object *object) {
 		const char *label = json_object_get_string(
 			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got activated! ", label);
 	});
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Inactive, [g_wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Inactive, [wm](json_object *object) {
 		const char *label = json_object_get_string(
 			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got inactivated!", label);
 	});
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Visible, [g_wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Visible, [wm](json_object *object) {
 		const char *label = json_object_get_string(
 			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got visibled!", label);
 	});
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Invisible, [g_wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_Invisible, [wm](json_object *object) {
 		const char *label = json_object_get_string(
 			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got invisibled!", label);
 		gIsDraw = false;
 	});
 
-	g_wm->set_event_handler(LibWindowmanager::Event_SyncDraw, [g_wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_SyncDraw, [wm](json_object *object) {
 		const char *label = json_object_get_string(
 			json_object_object_get(object, g_wm->kKeyDrawingName));
 		const char *area = json_object_get_string(
@@ -170,7 +170,7 @@ int init_wm(LibWindowmanager *wm)
         g_wm->endDraw(obj);
     });
 
-	g_wm->set_event_handler(LibWindowmanager::Event_FlushDraw, [g_wm](json_object *object) {
+	g_wm->set_event_handler(LibWindowmanager::Event_FlushDraw, [wm](json_object *object) {
 		const char *label = json_object_get_string(
 			json_object_object_get(object, g_wm->kKeyDrawingName));
 		fprintf(stderr,"Surface %s got flushdraw! ", label);

@@ -613,9 +613,12 @@ int main(int argc, char *argv[])
 	GLVWindow	glv_hmi_window;
 	int rc;
 
+
+	fprintf(stderr,"start gps navi\n");	
+
 	if (argc < 2)
 	{
-		fprintf(stderr,"Error:few args\n"	
+		fprintf(stderr,"Error:few args\n");	
 	}
 
 	rc = main_arg(argc,argv);
