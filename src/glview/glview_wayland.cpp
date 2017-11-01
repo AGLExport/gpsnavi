@@ -29,7 +29,7 @@
 #include <wayland-egl.h>
 
 #define	IVISHELL	(1)
-#define IVI_SURFACE_ID (0x1302)
+//#define IVI_SURFACE_ID (0x1302)
 #include "ivi-application-client-protocol.h"
 
 #include <poll.h>
@@ -38,6 +38,10 @@
 
 #include "glview.h"
 #include "glview_local.h"
+
+#include <libwindowmanager.h>
+#include <libhomescreen.hpp>
+#include "NaviTrace.h"
 
 #ifdef GLV_WAYLAND_INPUT
 extern GLVContext _glv_parent_context;
@@ -63,6 +67,142 @@ struct touch_event_data
 static void mouse_event(GLVMOUSEEVENT_t *glv_mouse_enent);
 
 GLVINPUTFUNC_t	glv_input_func = {};
+
+// ------------------------------------------------------------------------------------
+//windowmanager
+LibWindowmanager	*g_wm;
+LibHomeScreen	*g_hs;
+uint32_t g_id_ivisurf = 0;
+bool gIsDraw;
+
+const char *g_app_name = "NAVI";
+
+extern "C" int canUpdate(void)
+{
+	if (gIsDraw == true) return 1;
+
+	return 0;
+}
+
+int init_wm(LibWindowmanager *wm)
+{
+	char* surfaceIdStr;
+
+	if (wm->init(port, token.c_str()) != 0) {
+        	return -1;
+	}
+
+	json_object *obj = json_object_new_object();
+	json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string(g_app_name));
+	if (wm->requestSurface(obj) != 0) {
+		fprintf(stderr,"wm request surface failed ");
+		return -1;
+	}
+
+	wm->set_event_handler(LibWindowmanager::Event_Active, [wm](json_object *object) {
+		const char *label = json_object_get_string(
+			json_object_object_get(object, wm->kKeyDrawingName));
+		fprintf(stderr,"Surface %s got activated! ", label);
+	});
+
+	wm->set_event_handler(LibWindowmanager::Event_Inactive, [wm](json_object *object) {
+		const char *label = json_object_get_string(
+			json_object_object_get(object, wm->kKeyDrawingName));
+		fprintf(stderr,"Surface %s got inactivated!", label);
+	});
+
+	wm->set_event_handler(LibWindowmanager::Event_Visible, [wm](json_object *object) {
+		const char *label = json_object_get_string(
+			json_object_object_get(object, wm->kKeyDrawingName));
+		fprintf(stderr,"Surface %s got visibled!", label);
+	});
+
+	wm->set_event_handler(LibWindowmanager::Event_Invisible, [wm](json_object *object) {
+		const char *label = json_object_get_string(
+			json_object_object_get(object, wm->kKeyDrawingName));
+		fprintf(stderr,"Surface %s got invisibled!", label);
+		gIsDraw = false;
+	});
+
+	wm->set_event_handler(LibWindowmanager::Event_SyncDraw, [wm](json_object *object) {
+		const char *label = json_object_get_string(
+			json_object_object_get(object, wm->kKeyDrawingName));
+		const char *area = json_object_get_string(
+			json_object_object_get(object, wm->kKeyDrawingArea));
+
+		fprintf(stderr,"Surface %s got syncDraw! Area: %s. ", label, area);
+		if ((wm->kStrLayoutNormal + "." + wm->kStrAreaFull) == std::string(area)) {
+			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d ", area, 0, 0, 1080, 1488);
+			wl_egl_window_resize(gWindow->native, 1080, 1488, 0, 0);
+			gWindow->geometry.width = 1080;
+			gWindow->geometry.height = 1488;
+		}
+		else if ((wm->kStrLayoutSplit + "." + wm->kStrAreaMain)	== std::string(area) ||
+				 (wm->kStrLayoutSplit + "." + wm->kStrAreaSub) == std::string(area)) {
+			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d ", area, 0, 0, 1080, 744);
+			wl_egl_window_resize(gWindow->native, 1080, 744, 0, 0);
+			gWindow->geometry.width = 1080;
+			gWindow->geometry.height = 744;
+		}
+
+		if (!gWindow->fullscreen)
+			gWindow->window_size = gWindow->geometry;
+		gIsDraw = true;
+		json_object *obj = json_object_new_object();
+		json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string(g_app_name));
+
+        wm->endDraw(obj);
+    });
+
+	wm->set_event_handler(LibWindowmanager::Event_FlushDraw, [wm](json_object *object) {
+		const char *label = json_object_get_string(
+			json_object_object_get(object, wm->kKeyDrawingName));
+		fprintf(stderr,"Surface %s got flushdraw! ", label);
+	});
+
+	do
+	{
+        	surfaceIdStr = getenv("QT_IVI_SURFACE_ID");
+	} while (surfaceIdStr == NULL);
+
+	g_id_ivisurf = atoi(surfaceIdStr);
+	fprintf(stderr,"IVI_SURFACE_ID: %d ", g_id_ivisurf);
+
+	return 0;
+}
+
+int
+init_hs(LibHomeScreen* hs){
+	if(hs->init(port, token)!=0)
+	{
+		fprintf(stderr,"homescreen init failed. ");
+		return -1;
+	}
+
+	hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
+		const char *application_name = json_object_get_string(
+			json_object_object_get(object, "application_name"));
+		fprintf(stderr,"Event_TapShortcut application_name = %s ", application_name);
+		if(strcmp(application_name, g_app_name) == 0)
+		{
+			fprintf(stderr,"try to activesurface %s ", g_app_name);
+			json_object *obj = json_object_new_object();
+			json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string(g_app_name));
+			json_object_object_add(obj, wm->kKeyDrawingArea, json_object_new_string("normal.full"));
+			gIsDraw = false;
+			wm->activateSurface(obj);
+		}
+	});
+
+	hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [](json_object *object){
+		const char *display_message = json_object_get_string(
+			json_object_object_get(object, "display_message"));
+        fprintf(stderr,"Event_OnScreenMessage display_message = %s ", display_message);
+	});
+
+	return 0;
+}
+
 
 // ------------------------------------------------------------------------------------
 // keyboard
@@ -576,13 +716,30 @@ GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 
 #ifdef IVISHELL
 		{
-			uint32_t id_ivisurf = IVI_SURFACE_ID;
-			ivi_surface = ivi_application_surface_create(wl_dpy->ivi_application, id_ivisurf, surface);
+			g_wm = new LibWindowmanager();
+			g_hs = new LibHomeScreen();			
+
+			if(init_wm(g_wm)!=0){
+				fprintf(stderr, "Init LibWindowmanager\n");
+				abort();
+			}
+
+			if(init_hs(g_hs)!=0){
+				fprintf(stderr, "Init LibHomeScreen\n");
+				abort();
+			}
+
+			ivi_surface = ivi_application_surface_create(wl_dpy->ivi_application, g_id_ivisurf, surface);
 		
 			if (ivi_surface == NULL) {
 				fprintf(stderr, "Failed to create ivi_client_surface\n");
 				abort();
 			}
+
+			json_object *obj = json_object_new_object();
+			json_object_object_add(obj, wm->kKeyDrawingName, json_object_new_string("NAVI"));
+			json_object_object_add(obj, wm->kKeyDrawingArea, json_object_new_string("normal.full"));
+			wm->activateSurface(obj);
 		}
 #else
 		shell_surface = wl_shell_get_shell_surface(wl_dpy->shell,surface);

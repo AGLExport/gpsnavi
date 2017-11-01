@@ -569,7 +569,7 @@ sms/sms-core/SMCoreMP/MP_Def.h \
 sms/sms-core/SMCoreMP/MP_GL.h \
 sms/sms-core/SMUtil/pthread_msq.h \
 glview/glview.c \
-glview/glview_wayland.c \
+glview/glview_wayland.cpp \
 glview/ivi-application-protocol.c \
 yspng/yspng.cpp \
 pthread/pthread_timer.c \
