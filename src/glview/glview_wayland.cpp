@@ -102,7 +102,8 @@ void setToken(char *tkn)
 }
 int init_wm(LibWindowmanager *wm)
 {
-	char* surfaceIdStr;
+	//char* surfaceIdStr;
+	int result = -1;
 
 	if (g_wm->init(g_port, g_token.c_str()) != 0) {
         	return -1;
@@ -110,10 +111,14 @@ int init_wm(LibWindowmanager *wm)
 
 	json_object *obj = json_object_new_object();
 	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
-	if (g_wm->requestSurface(obj) != 0) {
+	
+	result = g_wm->requestSurface(obj);
+	if (result <  0) {
 		fprintf(stderr,"wm request surface failed ");
 		return -1;
 	}
+
+	g_id_ivisurf = result;
 
 	g_wm->set_event_handler(LibWindowmanager::Event_Active, [wm](json_object *object) {
 		const char *label = json_object_get_string(
@@ -176,12 +181,14 @@ int init_wm(LibWindowmanager *wm)
 		fprintf(stderr,"Surface %s got flushdraw! ", label);
 	});
 
+/*
 	do
 	{
         	surfaceIdStr = getenv("QT_IVI_SURFACE_ID");
 	} while (surfaceIdStr == NULL);
 
 	g_id_ivisurf = atoi(surfaceIdStr);
+*/
 	fprintf(stderr,"IVI_SURFACE_ID: %d ", g_id_ivisurf);
 
 	return 0;
