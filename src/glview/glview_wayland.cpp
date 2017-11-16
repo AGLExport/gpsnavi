@@ -682,8 +682,8 @@ extern "C" void _glvOpenNativeDisplay(GLVDISPLAY_t *glv_dpy)
 {
 	   struct wl_registry *registry;
 
-	   glv_dpy->native_dpy = wl_display_connect(NULL);
-	   glv_dpy->wl_dpy.display = glv_dpy->native_dpy;
+	   glv_dpy->native_dpy = (EGLNativeDisplayType)wl_display_connect(NULL);
+	   glv_dpy->wl_dpy.display = (struct wl_display*)glv_dpy->native_dpy;
 
 	   if (!glv_dpy->native_dpy){
 	      fprintf(stderr,"failed to initialize native display\n");
@@ -691,16 +691,16 @@ extern "C" void _glvOpenNativeDisplay(GLVDISPLAY_t *glv_dpy)
 	   glv_dpy->wl_dpy.compositor = 0;
 	   glv_dpy->wl_dpy.shell = 0;
 
-	   registry = wl_display_get_registry(glv_dpy->native_dpy);
+	   registry = wl_display_get_registry((struct wl_display*)glv_dpy->native_dpy);
 	   wl_registry_add_listener(registry, &registry_listener, &glv_dpy->wl_dpy);
-	   wayland_roundtrip(glv_dpy->native_dpy);
+	   wayland_roundtrip((struct wl_display*)glv_dpy->native_dpy);
 	   wl_registry_destroy(registry);
 }
 
 extern "C" void _glvCloseNativeDisplay(GLVDISPLAY_t *glv_dpy)
 {
-	   wl_display_flush(glv_dpy->native_dpy);
-	   wl_display_disconnect(glv_dpy->native_dpy);
+	   wl_display_flush((struct wl_display*)glv_dpy->native_dpy);
+	   wl_display_disconnect((struct wl_display*)glv_dpy->native_dpy);
 }
 
 extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
@@ -817,7 +817,7 @@ extern "C" void _glvDestroyNativeWindow(GLVWindow glv_win)
 {
 	GLVWINDOW_t *glv_window=(GLVWINDOW_t *)glv_win;
 
-	wl_egl_window_destroy(glv_window->egl_window);
+	wl_egl_window_destroy((struct wl_egl_window *)glv_window->egl_window);
 
 	if (glv_window->wl_window.shell_surface)
 		wl_shell_surface_destroy(glv_window->wl_window.shell_surface);
