@@ -15,7 +15,7 @@
   </feature>
   <license>GPL</license>
   <feature name="urn:AGL:widget:file-properties">
-    <param name="flite" value="executable" />
-    <param name="jtalk" value="executable" />
+    <param name="bin/flite" value="executable" />
+    <param name="bin/jtalk" value="executable" />
   </feature>
 </widget>
