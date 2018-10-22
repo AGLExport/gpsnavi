@@ -202,18 +202,12 @@ init_hs(LibHomeScreen* hs){
 	}
 
 	g_hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
-		const char *application_name = json_object_get_string(
-			json_object_object_get(object, "application_name"));
-		fprintf(stderr,"Event_TapShortcut application_name = %s \n", application_name);
-		if(strcmp(application_name, g_app_name) == 0)
-		{
-			fprintf(stderr,"try to activesurface %s \n", g_app_name);
-			json_object *obj = json_object_new_object();
-			json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
-			json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
-			gIsDraw = false;
-			g_wm->activateSurface(obj);
-		}
+		fprintf(stderr,"try to activesurface %s \n", g_app_name);
+		json_object *obj = json_object_new_object();
+		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
+		json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
+		gIsDraw = false;
+		g_wm->activateWindow(obj);
 	});
 
 	g_hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [](json_object *object){
@@ -906,7 +900,7 @@ void glvActivateSurface()
 	json_object *obj = json_object_new_object();
 	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
 	json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
-	g_wm->activateSurface(obj);
+	g_wm->activateWindow(obj);
 #endif
 }
 
