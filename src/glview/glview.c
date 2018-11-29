@@ -260,7 +260,7 @@ void *glvSurfaceViewMsgHandler(GLVCONTEXT_t *glv_context)
 			break;
 		case GLV_ON_ACTIVATE:
 			GLV_DEBUG printf("GLV_ON_ACTIVATE\n");
-			glvActivateSurface();
+			glvActivateWindow();
 			break;
 		default:
 			break;
