@@ -78,7 +78,7 @@ uint32_t g_id_ivisurf = 0;
 bool gIsDraw;
 long g_port = 0;
 std::string g_token;
-const char *g_app_name = "Navigation";
+const char *g_graphic_role = "navigation";
 
 extern "C" {
 int canUpdate(void)
@@ -105,12 +105,12 @@ int init_wm(LibWindowmanager *wm)
 	int result = -1;
 
 	if (g_wm->init(g_port, g_token.c_str()) != 0) {
-        	return -1;
+			return -1;
 	}
 
 	json_object *obj = json_object_new_object();
-	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
-	
+	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_graphic_role));
+
 	result = g_wm->requestSurface(obj);
 	if (result < 0) {
 		fprintf(stderr,"wm request surface failed \n");
@@ -169,7 +169,7 @@ int init_wm(LibWindowmanager *wm)
 		//	gWindow->window_size = gWindow->geometry;
 		gIsDraw = true;
 		json_object *obj = json_object_new_object();
-		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
+		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_graphic_role));
 
         g_wm->endDraw(obj);
     });
@@ -202,9 +202,9 @@ init_hs(LibHomeScreen* hs){
 	}
 
 	g_hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
-		fprintf(stderr,"try to activesurface %s \n", g_app_name);
+		fprintf(stderr,"try to activesurface %s \n", g_graphic_role);
 		json_object *obj = json_object_new_object();
-		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
+		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_graphic_role));
 		json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
 		gIsDraw = false;
 		g_wm->activateWindow(obj);
@@ -705,7 +705,7 @@ extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 	struct wl_subsurface	*subsurface  = NULL;
 	struct wl_shell_surface	*shell_surface = NULL;
 	struct ivi_surface		*ivi_surface  = NULL;
-	
+
 	struct wl_egl_window	*native;
 	struct wl_region		*region;
 	WLDISPLAY_t	*wl_dpy;
@@ -736,7 +736,7 @@ extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 #ifdef IVISHELL
 		{
 			g_wm = new LibWindowmanager();
-			g_hs = new LibHomeScreen();			
+			g_hs = new LibHomeScreen();
 
 			if(init_wm(g_wm)!=0){
 				fprintf(stderr, "Init LibWindowmanager\n");
@@ -749,7 +749,7 @@ extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 			}
 
 			ivi_surface = ivi_application_surface_create(wl_dpy->ivi_application, g_id_ivisurf, surface);
-		
+
 			if (ivi_surface == NULL) {
 				fprintf(stderr, "Failed to create ivi_client_surface\n");
 				abort();
@@ -898,7 +898,7 @@ void glvActivateSurface()
 {
 #ifdef IVISHELL
 	json_object *obj = json_object_new_object();
-	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
+	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_graphic_role));
 	json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
 	g_wm->activateWindow(obj);
 #endif
