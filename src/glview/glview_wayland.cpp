@@ -175,11 +175,8 @@ init_hs(LibHomeScreen* hs){
 
 	g_hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
 		fprintf(stderr,"try to activewindow %s \n", g_graphic_role);
-		json_object *obj = json_object_new_object();
-		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_graphic_role));
-		json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
 		gIsDraw = false;
-		g_wm->activateWindow(obj);
+		g_wm->activateWindow(g_graphic_role);
 	});
 
 	g_hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [](json_object *object){
