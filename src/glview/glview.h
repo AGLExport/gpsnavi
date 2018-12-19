@@ -118,7 +118,7 @@ int glvStartTimer(GLVContext glv_c,int id);
 int glvStopTimer(GLVContext glv_c,int id);
 
 void glvEventLoop(GLVDisplay glv_dpy);
-void glvActivateSurface();
+void glvActivateWindow();
 
 #ifdef __cplusplus
 }

@@ -78,7 +78,7 @@ uint32_t g_id_ivisurf = 0;
 bool gIsDraw;
 long g_port = 0;
 std::string g_token;
-const char *g_app_name = "Navigation";
+const char *g_graphic_role = "navigation";
 
 extern "C" {
 int canUpdate(void)
@@ -104,14 +104,11 @@ int init_wm(LibWindowmanager *wm)
 {
 	int result = -1;
 
-	if (g_wm->init(g_port, g_token.c_str()) != 0) {
-        	return -1;
+	if (g_wm->init(g_port, g_token) != 0) {
+			return -1;
 	}
 
-	json_object *obj = json_object_new_object();
-	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
-	
-	result = g_wm->requestSurface(obj);
+	result = g_wm->requestSurface(g_graphic_role);
 	if (result < 0) {
 		fprintf(stderr,"wm request surface failed \n");
 		return -1;
@@ -119,67 +116,42 @@ int init_wm(LibWindowmanager *wm)
 
 	g_id_ivisurf = result;
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Active, [wm](json_object *object) {
-		const char *label = json_object_get_string(
-			json_object_object_get(object, g_wm->kKeyDrawingName));
-		fprintf(stderr,"Surface %s got activated! \n", label);
-	});
+	WMHandler wmh;
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Inactive, [wm](json_object *object) {
-		const char *label = json_object_get_string(
-			json_object_object_get(object, g_wm->kKeyDrawingName));
-		fprintf(stderr,"Surface %s got inactivated! \n", label);
-	});
+	wmh.on_active = [](const char* role, bool active) {
+		fprintf(stderr,"Surface %s got %s! \n", role, active ? "activated" : "inactivated");
+	};
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Visible, [wm](json_object *object) {
-		const char *label = json_object_get_string(
-			json_object_object_get(object, g_wm->kKeyDrawingName));
-		fprintf(stderr,"Surface %s got visibled! \n", label);
-	});
+	wmh.on_visible = [](const char* role, bool visible){
+		fprintf(stderr,"Surface %s got inactivated! \n", role, visible ? "visibled" : "invisibled");
+	};
 
-	g_wm->set_event_handler(LibWindowmanager::Event_Invisible, [wm](json_object *object) {
-		const char *label = json_object_get_string(
-			json_object_object_get(object, g_wm->kKeyDrawingName));
-		fprintf(stderr,"Surface %s got invisibled! \n", label);
-		gIsDraw = false;
-	});
+	wmh.on_sync_draw = [](const char* role, const char* area, Rect rect) {
+		std::string _area = area;
 
-	g_wm->set_event_handler(LibWindowmanager::Event_SyncDraw, [wm](json_object *object) {
-		const char *label = json_object_get_string(
-			json_object_object_get(object, g_wm->kKeyDrawingName));
-		const char *area = json_object_get_string(
-			json_object_object_get(object, g_wm->kKeyDrawingArea));
-
-		fprintf(stderr,"Surface %s got syncDraw! Area: %s. \n", label, area);
-		if ((g_wm->kStrLayoutNormal + "." + g_wm->kStrAreaFull) == std::string(area)) {
+		if ((g_wm->kStrLayoutNormal + "." + g_wm->kStrAreaFull) == _area) {
 			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d \n", area, 0, 0, 1080, 1488);
 			//wl_egl_window_resize(gWindow->native, 1080, 1488, 0, 0);
 			//gWindow->geometry.width = 1080;
 			//gWindow->geometry.height = 1488;
 		}
-		else if ((g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaMain)	== std::string(area) ||
-				 (g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaSub) == std::string(area)) {
+		else if ((g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaMain)	== _area ||
+				 (g_wm->kStrLayoutSplit + "." + g_wm->kStrAreaSub) == _area) {
 			fprintf(stderr,"Layout:%s x:%d y:%d w:%d h:%d \n", area, 0, 0, 1080, 744);
 			//wl_egl_window_resize(gWindow->native, 1080, 744, 0, 0);
 			//gWindow->geometry.width = 1080;
 			//gWindow->geometry.height = 744;
 		}
-
-		//if (!gWindow->fullscreen)
-		//	gWindow->window_size = gWindow->geometry;
 		gIsDraw = true;
-		json_object *obj = json_object_new_object();
-		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
 
-        g_wm->endDraw(obj);
-    });
+		g_wm->endDraw(role);
+	};
 
-	g_wm->set_event_handler(LibWindowmanager::Event_FlushDraw, [wm](json_object *object) {
-		const char *label = json_object_get_string(
-			json_object_object_get(object, g_wm->kKeyDrawingName));
-		fprintf(stderr,"Surface %s got flushdraw! \n", label);
-	});
+	wmh.on_flush_draw = [](const char* role){
+		fprintf(stderr,"Surface %s got flushdraw! \n", role);
+	};
 
+	wm->setEventHandler(wmh);
 /*
 	do
 	{
@@ -202,12 +174,9 @@ init_hs(LibHomeScreen* hs){
 	}
 
 	g_hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
-		fprintf(stderr,"try to activesurface %s \n", g_app_name);
-		json_object *obj = json_object_new_object();
-		json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
-		json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
+		fprintf(stderr,"try to activewindow %s \n", g_graphic_role);
 		gIsDraw = false;
-		g_wm->activateWindow(obj);
+		g_wm->activateWindow(g_graphic_role);
 	});
 
 	g_hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [](json_object *object){
@@ -705,7 +674,7 @@ extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 	struct wl_subsurface	*subsurface  = NULL;
 	struct wl_shell_surface	*shell_surface = NULL;
 	struct ivi_surface		*ivi_surface  = NULL;
-	
+
 	struct wl_egl_window	*native;
 	struct wl_region		*region;
 	WLDISPLAY_t	*wl_dpy;
@@ -736,7 +705,7 @@ extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 #ifdef IVISHELL
 		{
 			g_wm = new LibWindowmanager();
-			g_hs = new LibHomeScreen();			
+			g_hs = new LibHomeScreen();
 
 			if(init_wm(g_wm)!=0){
 				fprintf(stderr, "Init LibWindowmanager\n");
@@ -749,7 +718,7 @@ extern "C" GLVWindow _glvCreateNativeWindow(GLVDISPLAY_t *glv_dpy,
 			}
 
 			ivi_surface = ivi_application_surface_create(wl_dpy->ivi_application, g_id_ivisurf, surface);
-		
+
 			if (ivi_surface == NULL) {
 				fprintf(stderr, "Failed to create ivi_client_surface\n");
 				abort();
@@ -894,11 +863,11 @@ void glvEventLoop(GLVDisplay glv_dpy)
    }
 }
 
-void glvActivateSurface()
+void glvActivateWindow()
 {
 #ifdef IVISHELL
 	json_object *obj = json_object_new_object();
-	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_app_name));
+	json_object_object_add(obj, g_wm->kKeyDrawingName, json_object_new_string(g_graphic_role));
 	json_object_object_add(obj, g_wm->kKeyDrawingArea, json_object_new_string("normal.full"));
 	g_wm->activateWindow(obj);
 #endif
